@@ -1,0 +1,24 @@
+﻿INSERT INTO AccRatesPeriods 
+SELECT 
+	NEWID(), 
+	YEAR(F.Moment) * 100 + MONTH(F.Moment),
+	R.Id, 
+	AVG( CAST( F.Rate AS FLOAT ) ), 
+	COUNT( * ), 
+	CURRENT_TIMESTAMP
+FROM Realties R JOIN Feedbacks F ON R.Id = F.RealtyId
+GROUP BY R.Id, YEAR(F.Moment) * 100 + MONTH(F.Moment);
+
+SELECT SUM(CntRates) FROM AccRatesPeriods;
+
+SELECT * FROM AccRatesPeriods 
+WHERE RealtyId = '22E952C1-877C-4854-B662-374DBDF95797' AND [Period] = 202410;
+
+SELECT * FROM AccRatesPeriods 
+WHERE RealtyId = '22E952C1-877C-4854-B662-374DBDF95797' AND [Period] = 202505;
+
+
+
+SELECT * FROM AccRatesPeriods 
+WHERE RealtyId = '22E952C1-877C-4854-B662-374DBDF95797' ORDER BY [Period] DESC;
+

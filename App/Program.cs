@@ -1,5 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+Console.WriteLine(File.ReadAllText("appsettings.json"));
 
 /* Збереження налаштувань, зокрема паролів
  * - налаштування мають бути в окремому файлі з можливістю
@@ -9,4 +9,10 @@ Console.WriteLine("Hello, World!");
  * - приватні налаштування вилучають з репозиторію
  *    (.gitignore) додаючи файл з шаблонними полями
  * - додаємо інструкцію до README файла репозиторію
+ */
+
+/* Д.З. Створити інструмент керування проєктом (на базі GitHub Projects)
+ * Додати картки-задачі, налаштувати терміни (Milestones),
+ * описати підзадачі у картках.
+ * Задачі - реальні на курсвий проєкт
  */
