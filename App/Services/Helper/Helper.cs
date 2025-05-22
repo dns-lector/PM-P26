@@ -20,20 +20,36 @@ namespace App.Services.Helper
         // }
         public String PathCombine(params String[] parts)
         {
-            char[] chars = ['/', '\\'];
+            char[] chars = ['/', '\\', ' '];
             LinkedList<String> list = [];
             foreach (String path in parts)
-            foreach (String part in Regex.Split(path, @"(?<!/)/(?!/)"))
             {
-                if (part == "") continue;
-                if (part == "..") list.RemoveLast();
-                else list.AddLast(
-                    part.Contains("://")
-                    ? part
-                    : $"/{part.TrimEnd(chars).TrimStart(chars)}"
-                );
+                foreach (String fragment in Regex.Split(path, @"(?<!/)/(?!/)"))
+                {
+                    String part = fragment.Trim();
+                    if (part == "" || part == ".") continue;
+                    if (part == "..") list.RemoveLast();
+                    else
+                    {
+                        int index = part.IndexOf("://");
+                        if (index != -1)                  // C://dir
+                        {
+                            index += 3;
+                            String disk = part[..index];
+                            list.AddLast(disk);
+                            if (part.Length > index)
+                            {
+                                list.AddLast(part[index..]);
+                            }                            
+                        }
+                        else
+                        {
+                            list.AddLast($"/{part.TrimEnd(chars).TrimStart(chars)}");
+                        }
+                    }
+                }
             }
-            return String.Join("", list);
+            return String.Join("", list).Replace("///", "//");
         }
     }
 }

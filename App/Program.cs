@@ -58,3 +58,5 @@ foreach (var rate in rates)
  * описати підзадачі у картках.
  * Задачі - реальні на курсвий проєкт
  */
+
+// Comment from VS

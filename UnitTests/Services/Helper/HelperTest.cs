@@ -82,13 +82,35 @@ namespace UnitTests.Services.Helper
                 @"Combination rule: 'dir/dir1' + '../dir2' + 'file' -> '/dir/dir2/file'"
             );
 
+            Assert.AreEqual(
+                @"C://file",
+                helper.PathCombine(@"C://dir", "..", "file"),
+                @"Combination rule: 'C://dir' + '..' + 'file' -> 'C://file'"
+            );
 
+            Assert.AreEqual(
+                @"ftp://file",
+                helper.PathCombine(@"ftp://dir", "..", "file"),
+                @"Combination rule: 'ftp://dir' + '..' + 'file' -> 'ftp://file'"
+            );
 
-            // Assert.AreEqual(
-            //     @"C://file",
-            //     helper.PathCombine(@"C://dir", "..", "file"),
-            //     @"Combination rule: 'C://dir' + 'file' -> 'C://dir/file'"
-            // );
+            Assert.AreEqual(
+                @"http://dir/sub/file",
+                helper.PathCombine(@"http://dir/", "./sub", "./file"),
+                @"Combination rule: 'http://dir/' + './sub' + './file' -> 'http://dir/sub/file'"
+            );
+
+            Assert.AreEqual(
+                @"http://dir/sub/file.txt",
+                helper.PathCombine(@"http://dir/", " ./sub", "  ./file.txt"),
+                @"Combination rule: 'http://dir/' + ' ./sub' + '  ./file.txt' -> 'http://dir/sub/file.txt'"
+            );
+
+            Assert.AreEqual(
+                @"http://dir/sub/file.txt",
+                helper.PathCombine(@" http://dir/ ", " ./sub\t", "  ./file.txt\r\n"),
+                @"Combination rule: ' http://dir/ ' + ' ./sub\t' + '  ./file.txt\r\n' -> 'http://dir/sub/file.txt'"
+            );
         }
     }
 }
