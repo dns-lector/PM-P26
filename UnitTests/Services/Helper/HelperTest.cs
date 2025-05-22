@@ -111,6 +111,29 @@ namespace UnitTests.Services.Helper
                 helper.PathCombine(@" http://dir/ ", " ./sub\t", "  ./file.txt\r\n"),
                 @"Combination rule: ' http://dir/ ' + ' ./sub\t' + '  ./file.txt\r\n' -> 'http://dir/sub/file.txt'"
             );
+
+            // ThrowsException порівнює типи суворо, спадкування НЕ враховується
+            var ex = Assert.ThrowsException<ArgumentException>(
+                () => helper.PathCombine(),
+                "helper.PathCombine() without argument must throw exception"
+            );
+            Assert.IsTrue(
+                ex.Message.Contains("'parts'"),
+                "helper.PathCombine() exception message must contain 'parts' word"
+            );
+            Assert.IsTrue(
+                ex.Message.Contains("must not be empty"),
+                "helper.PathCombine() exception message must contain 'must not be empty' phrase"
+            );
+
+            Assert.AreEqual(
+                "Invalid symbol '*' in argument 0 ('dir*')",
+                Assert.ThrowsException<ArgumentException>(
+                    () => helper.PathCombine("dir*"),
+                    "helper.PathCombine('dir*') must throw ArgumentException"
+                ).Message,
+                "helper.PathCombine('dir*') ex.Message must be 'Invalid symbol '*' in argument 0 ('dir*')'"
+            );
         }
     }
 }
