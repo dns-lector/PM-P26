@@ -25,12 +25,19 @@ namespace App.Services.Helper
                 throw new ArgumentException("'parts' must not be empty");
             }
             char[] chars = ['/', '\\', ' '];
+            char[] restrictedChars = ['*', '?'];
             LinkedList<String> list = [];
-            foreach (String path in parts)
+            for (int i = 0; i < parts.Length; ++i )
             {
-                if (path.Contains('*'))
+                String path = parts[i];
+                foreach (char c in restrictedChars)
                 {
-                    throw new ArgumentException("Invalid symbol '*' in argument 0 ('dir*')");
+                    if (path.Contains(c))
+                    {
+                        throw new ArgumentException(
+                            $"Invalid symbol '{c}' in argument {i} ('{path}')"
+                        );
+                    }
                 }
                 foreach (String fragment in Regex.Split(path, @"(?<!/)/(?!/)"))
                 {
@@ -42,6 +49,12 @@ namespace App.Services.Helper
                         int index = part.IndexOf("://");
                         if (index != -1)                  // C://dir
                         {
+                            // Перевіряємо чи це перший аргумент (кореневий елемент
+                            // не може бути в іншій позиції)
+                            if(i != 0)
+                            {
+                                throw new ArgumentException("Invalid sequence: root path 'C://' could not be at position 2");
+                            }
                             index += 3;
                             String disk = part[..index];
                             list.AddLast(disk);

@@ -1,5 +1,8 @@
-﻿using System;
+﻿using App.Services.Helper;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -134,6 +137,101 @@ namespace UnitTests.Services.Helper
                 ).Message,
                 "helper.PathCombine('dir*') ex.Message must be 'Invalid symbol '*' in argument 0 ('dir*')'"
             );
+            foreach (String path in new String[] { "dir*2", "sub*", "sub2*", "file*.txt", "*subdir" })
+            {
+                Assert.AreEqual(
+                    $"Invalid symbol '*' in argument 1 ('{path}')",
+                    Assert.ThrowsException<ArgumentException>(
+                        () => helper.PathCombine("dir", path),
+                        $"helper.PathCombine('dir', '{path}') must throw ArgumentException"
+                    ).Message,
+                    $"helper.PathCombine('dir', '{path}') ex.Message must be 'Invalid symbol '*' in argument 1 ('{path}')'"
+                );
+            }
+
+            {
+                String path = "file?.txt";
+                String msg = $"Invalid symbol '?' in argument 1 ('{path}')";
+                Assert.AreEqual(
+                    msg,
+                    Assert.ThrowsException<ArgumentException>(
+                        () => helper.PathCombine("dir", path, "obj"),
+                        $"helper.PathCombine('dir', '{path}', 'obj') must throw ArgumentException"
+                    ).Message,
+                    $"helper.PathCombine('dir', '{path}', 'obj') ex.Message must be '{msg}'"
+                );
+            }
+
+            {
+                String path = "sub?";
+                String msg = $"Invalid symbol '?' in argument 2 ('{path}')";
+                Assert.AreEqual(
+                    msg,
+                    Assert.ThrowsException<ArgumentException>(
+                        () => helper.PathCombine("dir", "obj", path, "file"),
+                        $"helper.PathCombine('dir', 'obj', '{path}', 'file') must throw ArgumentException"
+                    ).Message,
+                    $"helper.PathCombine('dir', 'obj', '{path}', 'file') ex.Message must be '{msg}'"
+                );
+            }
+
+            Dictionary<String[], int> testCases = new()
+            {
+                { ["dir", "obj", "sub?", "file"], 2 },
+                { ["dir*", "obj", "sub?", "file"], 0 },
+                { ["dir", "obj*", "sub?", "file"], 1 },
+                { ["dir", "obj", "sub", "file?"], 3 },
+                { ["?obj", "sub", "file?"], 0 },
+                { ["obj", "?sub", "file?"], 1 },
+                { ["obj", "sub", "file*"], 2 },
+                { ["ob*j", "sub"], 0 },
+                { ["sub", "file*"], 1 },
+            };
+            foreach( var testCase in testCases)
+            {
+                char c = testCase.Key[testCase.Value].Contains('*') ? '*' : '?';
+                String msg = $"Invalid symbol '{c}' in argument {testCase.Value} " +
+                    $"('{testCase.Key[testCase.Value]}')";
+                String invocation = $"helper.PathCombine({String.Join(", ", testCase.Key)})";
+                Assert.AreEqual(
+                    msg,
+                    Assert.ThrowsException<ArgumentException>(
+                        () => helper.PathCombine(testCase.Key),
+                        $"{invocation} must throw ArgumentException"
+                    ).Message,
+                    $"{invocation} ex.Message must be '{msg}'"
+                );
+            }
+
+        }
+
+        [TestMethod]
+        public void PathCombineInvalidRootPositionTest()
+        {
+            var helper = new App.Services.Helper.Helper();
+            Dictionary<String[], int> testCases = new()
+            {
+                { ["dir", "sub", "C://"], 2 },
+                { ["dir", "D://", "sub"], 1 },
+                { ["dir", "E://", "sub", "sub2"], 1 },
+                { ["dir", "sub", "ftp://", "sub2"], 2 },
+                { ["dir", "sub", "sub2", "http://"], 3 },
+                { ["dir", "ws://"], 1 },
+            };
+            foreach (var testCase in testCases)
+            {
+                String msg = $"Invalid sequence: root path '{testCase.Key[testCase.Value]}' " +
+                    $"could not be at position {testCase.Value}";
+                String invocation = $"helper.PathCombine({String.Join(", ", testCase.Key)})";
+                Assert.AreEqual(
+                    msg,
+                    Assert.ThrowsException<ArgumentException>(
+                        () => helper.PathCombine(testCase.Key),
+                        $"{invocation} must throw ArgumentException"
+                    ).Message,
+                    $"{invocation} ex.Message must be '{msg}'"
+                );
+            }
         }
     }
 }
