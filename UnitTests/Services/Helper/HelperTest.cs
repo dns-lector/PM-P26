@@ -211,17 +211,18 @@ namespace UnitTests.Services.Helper
             var helper = new App.Services.Helper.Helper();
             Dictionary<String[], int> testCases = new()
             {
-                { ["dir", "sub", "C://"], 2 },
-                { ["dir", "D://", "sub"], 1 },
+                { ["dir/sub1", "sub", "C://"], 2 },
+                { ["root/dir", "D://", "sub"], 1 },
                 { ["dir", "E://", "sub", "sub2"], 1 },
                 { ["dir", "sub", "ftp://", "sub2"], 2 },
                 { ["dir", "sub", "sub2", "http://"], 3 },
                 { ["dir", "ws://"], 1 },
+                { ["dir/tcp://", "sub"], 0 },
             };
             foreach (var testCase in testCases)
             {
-                String msg = $"Invalid sequence: root path '{testCase.Key[testCase.Value]}' " +
-                    $"could not be at position {testCase.Value}";
+                String msg = $"Invalid sequence: root path could not be preceded by sub path in argument" +
+                    $" {testCase.Value} ('{testCase.Key[testCase.Value]}')";
                 String invocation = $"helper.PathCombine({String.Join(", ", testCase.Key)})";
                 Assert.AreEqual(
                     msg,

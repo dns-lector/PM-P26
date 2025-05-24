@@ -39,6 +39,7 @@ namespace App.Services.Helper
                         );
                     }
                 }
+                int j = 0;
                 foreach (String fragment in Regex.Split(path, @"(?<!/)/(?!/)"))
                 {
                     String part = fragment.Trim();
@@ -51,9 +52,9 @@ namespace App.Services.Helper
                         {
                             // Перевіряємо чи це перший аргумент (кореневий елемент
                             // не може бути в іншій позиції)
-                            if(i != 0)
+                            if(i != 0 || j != 0)
                             {
-                                throw new ArgumentException("Invalid sequence: root path 'C://' could not be at position 2");
+                                throw new ArgumentException($"Invalid sequence: root path could not be preceded by sub path in argument {i} ('{path}')");
                             }
                             index += 3;
                             String disk = part[..index];
@@ -67,6 +68,8 @@ namespace App.Services.Helper
                         {
                             list.AddLast($"/{part.TrimEnd(chars).TrimStart(chars)}");
                         }
+
+                        j += 1;
                     }
                 }
             }
@@ -85,6 +88,10 @@ namespace App.Services.Helper
  "123"    | 
  "1234"   | 
  "12345"
+
+Expected:<Invalid sequence: root path could not be preceded by sub path in argument 0 ('dir/tcp://')>. 
+  Actual:<Invalid sequence: root path could not be preceded by sub path in argument 0 ('tcp://')>. helper.PathCombine(dir/tcp://, sub) ex.Message must be 'Invalid sequence: root path could not be preceded by sub path in argument 0 ('dir/tcp://')'
+
  */
 // Comment GH
 // Comment from VS
